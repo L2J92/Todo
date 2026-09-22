@@ -179,16 +179,18 @@ DELETE /todo/{id}
 
 ```json
 {
-  "code": "Not_Found",
+  "code": "TODO_NOT_FOUND",
   "message": "Todo not found"
 }
 ```
 
 | HTTP 상태 코드 | code 예시 | 발생 상황 |
 | --- | --- | --- |
-| `400 Bad Request` | `Illegal_Argument` | 요청 값이 올바르지 않은 경우 |
-| `404 Not Found` | `Not_Found` | 요청한 ID의 할 일이 없는 경우 |
-| `500 Internal Server Error` | `Internal_Server_Error` | 서버에서 예상하지 못한 오류가 발생한 경우 |
+| `400 Bad Request` | `VALIDATION_ERROR` | 제목이 비어 있거나 100자를 초과한 경우 |
+| `400 Bad Request` | `INVALID_REQUEST_BODY` | JSON 문법이나 요청 본문의 타입이 올바르지 않은 경우 |
+| `400 Bad Request` | `INVALID_PARAMETER` | URL 경로나 요청 파라미터의 타입이 올바르지 않은 경우 |
+| `404 Not Found` | `TODO_NOT_FOUND` | 요청한 ID의 할 일이 없는 경우 |
+| `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` | 서버에서 예상하지 못한 오류가 발생한 경우 |
 
 ## 설계 설명
 
@@ -331,7 +333,7 @@ Content-Type: application/json
 
 ```json
 {
-  "code": "Illegal_Argument",
+  "code": "VALIDATION_ERROR",
   "message": "Title cannot be blank"
 }
 ```
@@ -353,7 +355,7 @@ Content-Type: application/json
 
 ```json
 {
-  "code": "Not_Found",
+  "code": "TODO_NOT_FOUND",
   "message": "Todo not found"
 }
 ```
