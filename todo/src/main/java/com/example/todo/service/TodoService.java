@@ -34,7 +34,7 @@ public class TodoService {
 
     @Transactional
     public void add(TodoCreateRequest request) {
-        todoRepository.save(Todo.create(request.title(), request.completed()));
+        todoRepository.save(Todo.create(request.title(), false));
     }
 
     @Transactional
