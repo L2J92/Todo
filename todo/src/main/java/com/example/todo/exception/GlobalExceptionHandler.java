@@ -3,55 +3,88 @@ package com.example.todo.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("Exception : {}", e.getMessage());
-
-        ErrorResponse response = new ErrorResponse(
-                "Internal_Server_Error", e.getMessage()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-
+    // 존재하지 않는 Todo
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
-        log.warn("NotFoundException : {}", e.getMessage());
-
-        ErrorResponse response = new ErrorResponse(
-                "Not_Found", e.getMessage()
-        );
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public ResponseEntity<ErrorResponse> handleNotFound(
+            NotFoundException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        "TODO_NOT_FOUND",
+                        e.getMessage()
+                ));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.warn("IllegalArgumentException : {}", e.getMessage());
+    // @Valid 검증 실패
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            MethodArgumentNotValidException e
+    ) {
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("입력값이 올바르지 않습니다.");
 
-        ErrorResponse response = new ErrorResponse(
-                "Illegal_Argument", e.getMessage()
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(
+                        "VALIDATION_ERROR",
+                        message
+                ));
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
-        log.warn("IllegalStateException : {}", e.getMessage());
+    // JSON 문법 및 타입 오류
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequestBody(
+            HttpMessageNotReadableException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(
+                        "INVALID_REQUEST_BODY",
+                        "요청 본문의 형식이 올바르지 않습니다."
+                ));
+    }
 
-        ErrorResponse response = new ErrorResponse(
-                "Illegal_State", e.getMessage()
-        );
+    // URL 경로와 파라미터 타입 오류
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(
+                        "INVALID_PARAMETER",
+                        "요청 파라미터의 형식이 올바르지 않습니다."
+                ));
+    }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    // 처리하지 못한 나머지 오류
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpected(
+            Exception e
+    ) {
+        log.error("Unexpected exception", e);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(
+                        "INTERNAL_SERVER_ERROR",
+                        "서버 내부 오류가 발생했습니다."
+                ));
     }
 }
