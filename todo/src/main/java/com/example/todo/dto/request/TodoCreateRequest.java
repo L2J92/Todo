@@ -1,6 +1,7 @@
 package com.example.todo.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record TodoCreateRequest(
@@ -8,7 +9,7 @@ public record TodoCreateRequest(
         @Size(max = 100, message = "Title cannot exceed 100 characters")
         String title,
 
-        @NotBlank(message = "Description cannot be blank")
+        @NotNull(message = "Completed cannot be null")
         boolean completed
 ) {
 
