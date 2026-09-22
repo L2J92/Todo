@@ -1,0 +1,20 @@
+# IDE settings
+.idea/
+*.iml
+
+# Gradle caches and build output
+**/.gradle/
+**/build/
+
+# Local H2 database files
+**/data/*.mv.db
+**/data/*.trace.db
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
